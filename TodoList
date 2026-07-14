@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 2,
+  "tags": [],
+  "lastNodeId": 1,
+  "nodes": [
+    {
+      "kind": "Text",
+      "id": 1,
+      "name": "Siguientes pasos",
+      "tags": [],
+      "description": "Proximas implementaciones para al app Bambam",
+      "nodes": [],
+      "collapsed": true
+    }
+  ]
+}
