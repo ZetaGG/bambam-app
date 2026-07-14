@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
+import '../utils/category_utils.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -10,23 +11,6 @@ class ProductCard extends StatelessWidget {
     required this.product,
     required this.onTap,
   });
-
-  IconData _categoryIcon() {
-    switch (product.category) {
-      case 'Brincolines':
-        return Icons.child_care;
-      case 'Sillas':
-        return Icons.chair;
-      case 'Mesas':
-        return Icons.table_restaurant;
-      case 'Losa':
-        return Icons.dinner_dining;
-      case 'Manteles':
-        return Icons.texture;
-      default:
-        return Icons.inventory_2;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +33,7 @@ class ProductCard extends StatelessWidget {
                 children: [
                   Center(
                     child: Icon(
-                      _categoryIcon(),
+                      categoryIcon(product.category),
                       size: 48,
                       color: colorScheme.primary.withValues(alpha: 0.4),
                     ),

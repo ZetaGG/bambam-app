@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../providers/auth_provider.dart';
 import '../services/firestore_service.dart';
+import '../widgets/profile_option.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -12,16 +13,12 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       body: Consumer<AppAuthProvider>(
         builder: (context, authProvider, child) {
-          final user = authProvider.user;
-
           if (authProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-
-          if (user != null) {
-            return _buildAuthenticatedProfile(context, user, authProvider);
+          if (authProvider.user != null) {
+            return _buildAuthenticatedProfile(context, authProvider.user!, authProvider);
           }
-
           return _buildGuestProfile(context, authProvider);
         },
       ),
@@ -41,26 +38,18 @@ class ProfilePage extends StatelessWidget {
             CircleAvatar(
               radius: 48,
               backgroundColor: colorScheme.primaryContainer,
-              child: Icon(
-                Icons.person,
-                size: 48,
-                color: colorScheme.primary,
-              ),
+              child: Icon(Icons.person, size: 48, color: colorScheme.primary),
             ),
             const SizedBox(height: 24),
             Text(
               'Mi cuenta',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               'Inicia sesión para gestionar tus pedidos y ver tu historial',
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 32),
             SizedBox(
@@ -87,11 +76,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildAuthenticatedProfile(
-    BuildContext context,
-    User user,
-    AppAuthProvider authProvider,
-  ) {
+  Widget _buildAuthenticatedProfile(BuildContext context, User user, AppAuthProvider authProvider) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -103,55 +88,30 @@ class ProfilePage extends StatelessWidget {
           CircleAvatar(
             radius: 48,
             backgroundColor: colorScheme.primaryContainer,
-            backgroundImage: user.photoURL != null
-                ? NetworkImage(user.photoURL!)
-                : null,
-            child: user.photoURL == null
-                ? Icon(Icons.person, size: 48, color: colorScheme.primary)
-                : null,
+            backgroundImage: user.photoURL != null ? NetworkImage(user.photoURL!) : null,
+            child: user.photoURL == null ? Icon(Icons.person, size: 48, color: colorScheme.primary) : null,
           ),
           const SizedBox(height: 16),
           Text(
             user.displayName ?? 'Sin nombre',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
+            style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           Text(
             user.email ?? '',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
-            ),
+            style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 32),
-          _ProfileOption(
-            icon: Icons.shopping_bag_outlined,
-            title: 'Mis pedidos',
-            onTap: () {},
-          ),
-          _ProfileOption(
-            icon: Icons.location_on_outlined,
-            title: 'Direcciones',
-            onTap: () {},
-          ),
-          _ProfileOption(
-            icon: Icons.notifications_outlined,
-            title: 'Notificaciones',
-            onTap: () {},
-          ),
-          _ProfileOption(
-            icon: Icons.help_outline,
-            title: 'Ayuda',
-            onTap: () {},
-          ),
+          ProfileOption(icon: Icons.shopping_bag_outlined, title: 'Mis pedidos', onTap: () {}),
+          ProfileOption(icon: Icons.location_on_outlined, title: 'Direcciones', onTap: () {}),
+          ProfileOption(icon: Icons.notifications_outlined, title: 'Notificaciones', onTap: () {}),
+          ProfileOption(icon: Icons.help_outline, title: 'Ayuda', onTap: () {}),
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () async {
-                final firestoreService = FirestoreService();
-                await firestoreService.seedProducts();
+                await FirestoreService().seedProducts();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -169,9 +129,7 @@ class ProfilePage extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: OutlinedButton.icon(
-              onPressed: () async {
-                await authProvider.signOut();
-              },
+              onPressed: () => authProvider.signOut(),
               icon: const Icon(Icons.logout),
               label: const Text('Cerrar sesión'),
               style: OutlinedButton.styleFrom(
@@ -181,36 +139,6 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _ProfileOption extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-
-  const _ProfileOption({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: Icon(icon, color: colorScheme.primary),
-        title: Text(title),
-        trailing: Icon(
-          Icons.chevron_right,
-          color: colorScheme.onSurfaceVariant,
-        ),
-        onTap: onTap,
       ),
     );
   }

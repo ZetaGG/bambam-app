@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../services/firestore_service.dart';
 import '../widgets/product_card.dart';
+import '../widgets/empty_state.dart';
 import 'product_detail_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -37,16 +38,12 @@ class _HomePageState extends State<HomePage> {
             toolbarHeight: 56,
             title: Row(
               children: [
-                Icon(
-                  Icons.celebration_outlined,
-                  color: colorScheme.primary,
-                  size: 28,
-                ),
+                Icon(Icons.celebration_outlined, color: colorScheme.primary, size: 28),
                 const SizedBox(width: 8),
-                Text(
+                const Text(
                   'BanBan',
                   style: TextStyle(
-                    color: const Color(0xFF2B1F15),
+                    color: Color(0xFF2B1F15),
                     fontWeight: FontWeight.bold,
                     fontSize: 22,
                     letterSpacing: 1.2,
@@ -56,14 +53,12 @@ class _HomePageState extends State<HomePage> {
             ),
             actions: [
               IconButton(
-                icon: Icon(Icons.menu, color: const Color(0xFF2B1F15)),
+                icon: const Icon(Icons.menu, color: Color(0xFF2B1F15)),
                 onPressed: () {},
               ),
             ],
           ),
-          SliverToBoxAdapter(
-            child: _HeroBanner(colorScheme: colorScheme),
-          ),
+          SliverToBoxAdapter(child: _HeroBanner(colorScheme: colorScheme)),
           SliverPadding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             sliver: SliverToBoxAdapter(
@@ -90,39 +85,17 @@ class _HomePageState extends State<HomePage> {
             future: _productsFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SliverFillRemaining(
-                  child: Center(child: CircularProgressIndicator()),
-                );
+                return const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
               }
 
               if (snapshot.hasError) {
                 return SliverFillRemaining(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: colorScheme.error.withValues(alpha: 0.5),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Error al cargar productos',
-                          style: theme.textTheme.titleMedium,
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            setState(() {
-                              _productsFuture = _firestoreService.getProducts();
-                            });
-                          },
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Reintentar'),
-                        ),
-                      ],
-                    ),
+                  child: EmptyState(
+                    icon: Icons.error_outline,
+                    title: 'Error al cargar productos',
+                    subtitle: 'No se pudieron cargar los productos desde la base de datos',
+                    actionLabel: 'Reintentar',
+                    onAction: () => setState(() => _productsFuture = _firestoreService.getProducts()),
                   ),
                 );
               }
@@ -130,23 +103,11 @@ class _HomePageState extends State<HomePage> {
               final products = snapshot.data ?? [];
 
               if (products.isEmpty) {
-                return SliverFillRemaining(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.inventory_2_outlined,
-                          size: 64,
-                          color: colorScheme.primary.withValues(alpha: 0.3),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No hay productos disponibles',
-                          style: theme.textTheme.titleMedium,
-                        ),
-                      ],
-                    ),
+                return const SliverFillRemaining(
+                  child: EmptyState(
+                    icon: Icons.inventory_2_outlined,
+                    title: 'No hay productos disponibles',
+                    subtitle: 'Aún no se han agregado productos al catálogo',
                   ),
                 );
               }
@@ -172,14 +133,10 @@ class _HomePageState extends State<HomePage> {
                           final product = products[index];
                           return ProductCard(
                             product: product,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => ProductDetailPage(product: product),
-                                ),
-                              );
-                            },
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => ProductDetailPage(product: product)),
+                            ),
                           );
                         },
                         childCount: products.length,
@@ -190,9 +147,7 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
-          SliverPadding(
-            padding: const EdgeInsets.only(bottom: 16),
-          ),
+          const SliverPadding(padding: EdgeInsets.only(bottom: 16)),
         ],
       ),
     );

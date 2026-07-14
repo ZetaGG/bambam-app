@@ -3,6 +3,9 @@ import 'package:provider/provider.dart';
 import '../models/product.dart';
 import '../providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
+import '../utils/category_utils.dart';
+import '../utils/formatters.dart';
+import '../widgets/outlined_picker.dart';
 
 class ProductDetailPage extends StatefulWidget {
   final Product product;
@@ -19,29 +22,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   TimeOfDay? _selecionarHora;
 
   double get _totalPrice => widget.product.pricePerUnit * _cantidad;
-
-  IconData _categoryIcon() {
-    switch (widget.product.category) {
-      case 'Brincolines':
-        return Icons.child_care;
-      case 'Sillas':
-        return Icons.chair;
-      case 'Mesas':
-        return Icons.table_restaurant;
-      case 'Losa':
-        return Icons.dinner_dining;
-      case 'Manteles':
-        return Icons.texture;
-      default:
-        return Icons.inventory_2;
-    }
-  }
-
-  String _formatTime(TimeOfDay time) {
-    final hour = time.hour.toString().padLeft(2, '0');
-    final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
-  }
 
   void _addToCart() {
     final authProvider = context.read<AppAuthProvider>();
@@ -72,7 +52,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       final sameDate = existingDate.year == _seleccionarFecha!.year &&
           existingDate.month == _seleccionarFecha!.month &&
           existingDate.day == _seleccionarFecha!.day;
-      final sameTime = cartProvider.horaEntrega == _formatTime(_selecionarHora!);
+      final sameTime = cartProvider.horaEntrega == formatTime(_selecionarHora!);
 
       if (!sameDate || !sameTime) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -93,7 +73,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
       product: widget.product,
       quantity: _cantidad,
       fechaEntrega: _seleccionarFecha!,
-      horaEntrega: _formatTime(_selecionarHora!),
+      horaEntrega: formatTime(_selecionarHora!),
     );
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -104,7 +84,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           label: 'Ver carrito',
           onPressed: () {
             Navigator.of(context).pop();
-            // Navigate to cart tab
           },
         ),
       ),
@@ -129,117 +108,13 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 200,
-              width: double.infinity,
-              color: colorScheme.primaryContainer,
-              child: Stack(
-                children: [
-                  Center(
-                    child: Icon(
-                      _categoryIcon(),
-                      size: 80,
-                      color: colorScheme.primary.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  Positioned(
-                    top: 16,
-                    left: 16,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF598F55),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.check_circle,
-                            size: 14,
-                            color: Colors.white,
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'Disponible',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _ProductImage(product: product, colorScheme: colorScheme),
             Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              product.name,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: colorScheme.secondaryContainer,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                product.category,
-                                style: TextStyle(
-                                  color: colorScheme.onSecondaryContainer,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Precio por unidad',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '\$${product.pricePerUnit.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: colorScheme.primary,
-                              fontSize: 24,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                  _ProductHeader(product: product, theme: theme, colorScheme: colorScheme),
                   const SizedBox(height: 16),
                   Text(
                     product.description,
@@ -250,11 +125,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(
-                        Icons.inventory,
-                        size: 16,
-                        color: colorScheme.primary,
-                      ),
+                      Icon(Icons.inventory, size: 16, color: colorScheme.primary),
                       const SizedBox(width: 4),
                       Text(
                         'Stock disponible: ${product.stock}',
@@ -275,7 +146,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   Row(
                     children: [
                       Expanded(
-                        child: _OutlinedPicker(
+                        child: OutlinedPicker(
                           icon: Icons.calendar_today,
                           label: _seleccionarFecha != null
                               ? '${_seleccionarFecha!.day}/${_seleccionarFecha!.month}/${_seleccionarFecha!.year}'
@@ -283,23 +154,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           onTap: () async {
                             final date = await showDatePicker(
                               context: context,
-                              initialDate: DateTime.now().add(
-                                const Duration(days: 1),
-                              ),
+                              initialDate: DateTime.now().add(const Duration(days: 1)),
                               firstDate: DateTime.now(),
-                              lastDate: DateTime.now().add(
-                                const Duration(days: 365),
-                              ),
+                              lastDate: DateTime.now().add(const Duration(days: 365)),
                             );
-                            if (date != null) {
-                              setState(() => _seleccionarFecha = date);
-                            }
+                            if (date != null) setState(() => _seleccionarFecha = date);
                           },
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _OutlinedPicker(
+                        child: OutlinedPicker(
                           icon: Icons.access_time,
                           label: _selecionarHora != null
                               ? _selecionarHora!.format(context)
@@ -309,67 +174,17 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               context: context,
                               initialTime: const TimeOfDay(hour: 7, minute: 0),
                             );
-                            if (time != null) {
-                              setState(() => _selecionarHora = time);
-                            }
+                            if (time != null) setState(() => _selecionarHora = time);
                           },
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 20),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surfaceContainerHighest.withValues(
-                        alpha: 0.5,
-                      ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Cantidad:',
-                          style: theme.textTheme.bodyLarge?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          onPressed: _cantidad > 1
-                              ? () => setState(() => _cantidad--)
-                              : null,
-                          icon: const Icon(Icons.remove_circle_outline),
-                          color: colorScheme.primary,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: colorScheme.surface,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: colorScheme.outlineVariant,
-                            ),
-                          ),
-                          child: Text(
-                            '$_cantidad',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: _cantidad < product.stock
-                              ? () => setState(() => _cantidad++)
-                              : null,
-                          icon: const Icon(Icons.add_circle_outline),
-                          color: colorScheme.primary,
-                        ),
-                      ],
-                    ),
+                  _QuantitySelector(
+                    cantidad: _cantidad,
+                    maxStock: product.stock,
+                    onChanged: (qty) => setState(() => _cantidad = qty),
                   ),
                   const Divider(height: 32),
                   Row(
@@ -400,10 +215,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         style: FilledButton.styleFrom(
                           backgroundColor: colorScheme.tertiary,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 14,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -422,40 +234,179 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   }
 }
 
-class _OutlinedPicker extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
+class _ProductImage extends StatelessWidget {
+  final Product product;
+  final ColorScheme colorScheme;
 
-  const _OutlinedPicker({
-    required this.icon,
-    required this.label,
-    required this.onTap,
+  const _ProductImage({required this.product, required this.colorScheme});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 200,
+      width: double.infinity,
+      color: colorScheme.primaryContainer,
+      child: Stack(
+        children: [
+          Center(
+            child: Icon(
+              categoryIcon(product.category),
+              size: 80,
+              color: colorScheme.primary.withValues(alpha: 0.3),
+            ),
+          ),
+          Positioned(
+            top: 16,
+            left: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: const Color(0xFF598F55),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.check_circle, size: 14, color: Colors.white),
+                  SizedBox(width: 4),
+                  Text(
+                    'Disponible',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ProductHeader extends StatelessWidget {
+  final Product product;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
+
+  const _ProductHeader({
+    required this.product,
+    required this.theme,
+    required this.colorScheme,
   });
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: onTap,
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        side: BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                product.name,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: colorScheme.secondaryContainer,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  product.category,
+                  style: TextStyle(
+                    color: colorScheme.onSecondaryContainer,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Text(
+              'Precio por unidad',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              '\$${product.pricePerUnit.toStringAsFixed(2)}',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.primary,
+                fontSize: 24,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _QuantitySelector extends StatelessWidget {
+  final int cantidad;
+  final int maxStock;
+  final ValueChanged<int> onChanged;
+
+  const _QuantitySelector({
+    required this.cantidad,
+    required this.maxStock,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 16, color: Theme.of(context).colorScheme.primary),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              label,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-                fontSize: 13,
-              ),
-              overflow: TextOverflow.ellipsis,
+          Text(
+            'Cantidad:',
+            style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+          ),
+          const Spacer(),
+          IconButton(
+            onPressed: cantidad > 1 ? () => onChanged(cantidad - 1) : null,
+            icon: const Icon(Icons.remove_circle_outline),
+            color: colorScheme.primary,
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: colorScheme.outlineVariant),
             ),
+            child: Text(
+              '$cantidad',
+              style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+          IconButton(
+            onPressed: cantidad < maxStock ? () => onChanged(cantidad + 1) : null,
+            icon: const Icon(Icons.add_circle_outline),
+            color: colorScheme.primary,
           ),
         ],
       ),
