@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../models/product.dart';
 import '../services/firestore_service.dart';
 import '../utils/app_colors.dart';
 import '../widgets/product_card.dart';
 import '../widgets/empty_state.dart';
-import 'product_detail_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -127,9 +127,9 @@ class _HomePageState extends State<HomePage> {
                           final product = products[index];
                           return ProductCard(
                             product: product,
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(builder: (_) => ProductDetailPage(product: product)),
+                            onTap: () => context.push(
+                              '/product/${product.id}',
+                              extra: product,
                             ),
                           );
                         },
