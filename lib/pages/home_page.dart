@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
 import '../services/firestore_service.dart';
+import '../utils/app_colors.dart';
 import '../widgets/product_card.dart';
 import '../widgets/empty_state.dart';
 import 'product_detail_page.dart';
@@ -14,13 +15,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final FirestoreService _firestoreService = FirestoreService();
-  late Future<List<Product>> _productsFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _productsFuture = _firestoreService.getProducts();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +27,8 @@ class _HomePageState extends State<HomePage> {
           SliverAppBar(
             floating: false,
             pinned: false,
-            backgroundColor: const Color(0xFFD8D6D4),
-            foregroundColor: const Color(0xFF2B1F15),
+            backgroundColor: AppColors.sliverAppBarBackground,
+            foregroundColor: AppColors.sliverAppBarForeground,
             toolbarHeight: 56,
             title: Row(
               children: [
@@ -43,7 +37,7 @@ class _HomePageState extends State<HomePage> {
                 const Text(
                   'BanBan',
                   style: TextStyle(
-                    color: Color(0xFF2B1F15),
+                    color: AppColors.sliverAppBarForeground,
                     fontWeight: FontWeight.bold,
                     fontSize: 22,
                     letterSpacing: 1.2,
@@ -53,7 +47,7 @@ class _HomePageState extends State<HomePage> {
             ),
             actions: [
               IconButton(
-                icon: const Icon(Icons.menu, color: Color(0xFF2B1F15)),
+                icon: const Icon(Icons.menu, color: AppColors.sliverAppBarForeground),
                 onPressed: () {},
               ),
             ],
@@ -81,8 +75,8 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          FutureBuilder<List<Product>>(
-            future: _productsFuture,
+          StreamBuilder<List<Product>>(
+            stream: _firestoreService.productsStream(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const SliverFillRemaining(child: Center(child: CircularProgressIndicator()));
@@ -95,7 +89,7 @@ class _HomePageState extends State<HomePage> {
                     title: 'Error al cargar productos',
                     subtitle: 'No se pudieron cargar los productos desde la base de datos',
                     actionLabel: 'Reintentar',
-                    onAction: () => setState(() => _productsFuture = _firestoreService.getProducts()),
+                    onAction: () => setState(() {}),
                   ),
                 );
               }

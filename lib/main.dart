@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
+import 'utils/app_colors.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cart_provider.dart';
 import 'pages/home_page.dart';
@@ -58,7 +59,7 @@ class BanBanApp extends StatelessWidget {
           ),
           useMaterial3: true,
           navigationBarTheme: NavigationBarThemeData(
-            backgroundColor: const Color(0xFFDDD5CA),
+            backgroundColor: AppColors.navBarBackground,
             indicatorColor: const Color(0xFF8B7362).withValues(alpha: 0.2),
             iconTheme: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.selected)) {
@@ -78,7 +79,7 @@ class BanBanApp extends StatelessWidget {
             }),
           ),
           appBarTheme: const AppBarTheme(
-            backgroundColor: Color(0xFFA39381),
+            backgroundColor: AppColors.appBarBackground,
             foregroundColor: Colors.white,
             elevation: 0,
             centerTitle: true,

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/product.dart';
 import '../providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
+import '../utils/app_colors.dart';
 import '../utils/category_utils.dart';
 import '../utils/formatters.dart';
 import '../widgets/outlined_picker.dart';
@@ -261,7 +262,7 @@ class _ProductImage extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: const Color(0xFF598F55),
+                color: AppColors.available,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Row(

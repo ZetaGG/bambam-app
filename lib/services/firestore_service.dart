@@ -3,6 +3,10 @@ import '../models/product.dart';
 import '../models/cart_item.dart';
 
 class FirestoreService {
+  static final FirestoreService _instance = FirestoreService._internal();
+  factory FirestoreService() => _instance;
+  FirestoreService._internal();
+
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Future<void> saveUser({
@@ -22,25 +26,35 @@ class FirestoreService {
     }, SetOptions(merge: true));
   }
 
+  Product _productFromDoc(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return Product(
+      id: doc.id,
+      name: data['nombre'] ?? '',
+      description: data['descripcion'] ?? '',
+      category: data['categoria'] ?? '',
+      pricePerUnit: (data['precio'] ?? 0).toDouble(),
+      stock: data['stock'] ?? 0,
+      imageUrl: data['imagenUrl'] ?? '',
+      available: data['disponible'] ?? true,
+    );
+  }
+
   Future<List<Product>> getProducts() async {
     final snapshot = await _db
         .collection('products')
         .where('disponible', isEqualTo: true)
         .get();
 
-    return snapshot.docs.map((doc) {
-      final data = doc.data();
-      return Product(
-        id: doc.id,
-        name: data['nombre'] ?? '',
-        description: data['descripcion'] ?? '',
-        category: data['categoria'] ?? '',
-        pricePerUnit: (data['precio'] ?? 0).toDouble(),
-        stock: data['stock'] ?? 0,
-        imageUrl: data['imagenUrl'] ?? '',
-        available: data['disponible'] ?? true,
-      );
-    }).toList();
+    return snapshot.docs.map((doc) => _productFromDoc(doc)).toList();
+  }
+
+  Stream<List<Product>> productsStream() {
+    return _db
+        .collection('products')
+        .where('disponible', isEqualTo: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => _productFromDoc(doc)).toList());
   }
 
   // --- Cart methods ---

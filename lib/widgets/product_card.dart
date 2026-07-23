@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
+import '../utils/app_colors.dart';
 import '../utils/category_utils.dart';
 
 class ProductCard extends StatelessWidget {
@@ -48,7 +49,7 @@ class ProductCard extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: product.stock > 0
-                            ? const Color(0xFF598F55)
+                            ? AppColors.available
                             : Colors.red,
                         borderRadius: BorderRadius.circular(8),
                       ),
