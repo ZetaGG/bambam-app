@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import '../pages/home_page.dart';
 import '../pages/cart_page.dart';
 import '../pages/agenda_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/product_detail_page.dart';
 import '../models/product.dart';
+import '../providers/cart_provider.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -88,23 +90,45 @@ class _MainShellWithRouter extends StatelessWidget {
             initialLocation: index == navigationShell.currentIndex,
           );
         },
-        destinations: const [
-          NavigationDestination(
+        destinations: [
+          const NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),
             label: 'Inicio',
           ),
           NavigationDestination(
-            icon: Icon(Icons.shopping_cart_outlined),
-            selectedIcon: Icon(Icons.shopping_cart),
+            icon: Consumer<CartProvider>(
+              builder: (context, cart, _) {
+                final count = cart.itemCount;
+                if (count == 0) {
+                  return const Icon(Icons.shopping_cart_outlined);
+                }
+                return Badge(
+                  label: Text('$count', style: const TextStyle(fontSize: 10)),
+                  child: const Icon(Icons.shopping_cart_outlined),
+                );
+              },
+            ),
+            selectedIcon: Consumer<CartProvider>(
+              builder: (context, cart, _) {
+                final count = cart.itemCount;
+                if (count == 0) {
+                  return const Icon(Icons.shopping_cart);
+                }
+                return Badge(
+                  label: Text('$count', style: const TextStyle(fontSize: 10)),
+                  child: const Icon(Icons.shopping_cart),
+                );
+              },
+            ),
             label: 'Carrito',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.event_note_outlined),
             selectedIcon: Icon(Icons.event_note),
             label: 'Pedidos',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person),
             label: 'Perfil',
