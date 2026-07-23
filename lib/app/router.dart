@@ -7,6 +7,7 @@ import '../pages/agenda_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/product_detail_page.dart';
 import '../pages/checkout_page.dart';
+import '../pages/notifications_page.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
 
@@ -75,6 +76,11 @@ final appRouter = GoRouter(
       path: '/checkout',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const CheckoutPage(),
+    ),
+    GoRoute(
+      path: '/notifications',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const NotificationsPage(),
     ),
   ],
 );

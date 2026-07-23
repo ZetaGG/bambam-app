@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 import '../models/product.dart';
 import '../models/cart_item.dart';
 import '../models/order.dart';
+import '../models/app_notification.dart';
 
 class FirestoreService {
   static final FirestoreService _instance = FirestoreService._internal();
@@ -197,5 +198,43 @@ class FirestoreService {
     }
 
     await batch.commit();
+  }
+
+  // --- Notifications methods ---
+
+  String _notificationsPath(String uid) => 'users/$uid/notifications';
+
+  Stream<List<AppNotification>> notificationsStream(String uid) {
+    return _db
+        .collection(_notificationsPath(uid))
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => AppNotification.fromFirestore(doc))
+              .toList(),
+        );
+  }
+
+  Future<void> markNotificationAsRead(String uid, String notificationId) async {
+    await _db
+        .collection(_notificationsPath(uid))
+        .doc(notificationId)
+        .update({'read': true});
+  }
+
+  Future<void> addNotification({
+    required String uid,
+    required String title,
+    required String body,
+    String? orderId,
+  }) async {
+    await _db.collection(_notificationsPath(uid)).add({
+      'title': title,
+      'body': body,
+      'createdAt': FieldValue.serverTimestamp(),
+      'read': false,
+      'orderId': orderId,
+    });
   }
 }

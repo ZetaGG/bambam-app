@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../providers/auth_provider.dart';
@@ -104,7 +105,7 @@ class ProfilePage extends StatelessWidget {
           const SizedBox(height: 32),
           ProfileOption(icon: Icons.shopping_bag_outlined, title: 'Mis pedidos', onTap: () {}),
           ProfileOption(icon: Icons.location_on_outlined, title: 'Direcciones', onTap: () {}),
-          ProfileOption(icon: Icons.notifications_outlined, title: 'Notificaciones', onTap: () {}),
+          ProfileOption(icon: Icons.notifications_outlined, title: 'Notificaciones', onTap: () => context.push('/notifications')),
           ProfileOption(icon: Icons.help_outline, title: 'Ayuda', onTap: () {}),
           const SizedBox(height: 16),
           SizedBox(

@@ -7,6 +7,7 @@ import 'app/router.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/orders_provider.dart';
+import 'providers/notifications_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,7 @@ class BanBanApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AppAuthProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => OrdersProvider()),
+        ChangeNotifierProvider(create: (_) => NotificationsProvider()),
       ],
       child: CartSyncListener(
         child: MaterialApp.router(
@@ -134,14 +136,17 @@ class _CartSyncListenerState extends State<CartSyncListener> {
     final authProvider = context.read<AppAuthProvider>();
     final cartProvider = context.read<CartProvider>();
     final ordersProvider = context.read<OrdersProvider>();
+    final notificationsProvider = context.read<NotificationsProvider>();
     final user = authProvider.user;
 
     if (user != null) {
       cartProvider.subscribeToCart(user.uid);
       ordersProvider.subscribeToOrders(user.uid);
+      notificationsProvider.subscribeToNotifications(user.uid);
     } else {
       cartProvider.unsubscribeFromCart();
       ordersProvider.unsubscribeFromOrders();
+      notificationsProvider.unsubscribeFromNotifications();
     }
   }
 
