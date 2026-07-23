@@ -6,6 +6,7 @@ import 'utils/app_colors.dart';
 import 'app/router.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cart_provider.dart';
+import 'providers/orders_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,6 +23,7 @@ class BanBanApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AppAuthProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => OrdersProvider()),
       ],
       child: CartSyncListener(
         child: MaterialApp.router(
@@ -131,12 +133,15 @@ class _CartSyncListenerState extends State<CartSyncListener> {
   void _syncCartWithAuth() {
     final authProvider = context.read<AppAuthProvider>();
     final cartProvider = context.read<CartProvider>();
+    final ordersProvider = context.read<OrdersProvider>();
     final user = authProvider.user;
 
     if (user != null) {
       cartProvider.subscribeToCart(user.uid);
+      ordersProvider.subscribeToOrders(user.uid);
     } else {
       cartProvider.unsubscribeFromCart();
+      ordersProvider.unsubscribeFromOrders();
     }
   }
 

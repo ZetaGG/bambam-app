@@ -1,6 +1,7 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 import '../models/product.dart';
 import '../models/cart_item.dart';
+import '../models/order.dart';
 
 class FirestoreService {
   static final FirestoreService _instance = FirestoreService._internal();
@@ -126,6 +127,51 @@ class FirestoreService {
       batch.delete(doc.reference);
     }
     await batch.commit();
+  }
+
+  // --- Orders methods ---
+
+  String _ordersPath(String uid) => 'users/$uid/orders';
+
+  Stream<List<Order>> ordersStream(String uid) {
+    return _db
+        .collection(_ordersPath(uid))
+        .orderBy('fechaCreacion', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => Order.fromFirestore(doc)).toList(),
+        );
+  }
+
+  Future<void> createOrder({
+    required String uid,
+    required DateTime fechaEvento,
+    required String horaEntrega,
+    required String direccion,
+    required String telefono,
+    String? referencias,
+    required List<OrderItem> items,
+  }) async {
+    final total = items.fold<double>(
+      0,
+      (accumulator, item) => accumulator + item.subtotal,
+    );
+    final anticipo = total * 0.2;
+
+    await _db.collection(_ordersPath(uid)).add({
+      'uid': uid,
+      'fechaCreacion': FieldValue.serverTimestamp(),
+      'fechaEvento': Timestamp.fromDate(fechaEvento),
+      'horaEntrega': horaEntrega,
+      'direccion': direccion,
+      'telefono': telefono,
+      'referencias': referencias,
+      'items': items.map((item) => item.toMap()).toList(),
+      'totalEstimado': total,
+      'anticipo': anticipo,
+      'status': OrderStatus.reserved.name,
+    });
   }
 
   // --- Seed ---
