@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/order.dart';
 import '../utils/category_utils.dart';
 import '../widgets/order_status_chip.dart';
+import '../widgets/order_status_timeline.dart';
 
 class OrderDetailPage extends StatelessWidget {
   final Order order;
@@ -46,6 +47,10 @@ class OrderDetailPage extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+              child: OrderStatusTimeline(currentStatus: order.status),
             ),
             Padding(
               padding: const EdgeInsets.all(20),
