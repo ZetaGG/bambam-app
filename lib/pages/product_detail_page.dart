@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/product.dart';
 import '../providers/auth_provider.dart';
 import '../providers/cart_provider.dart';
+import '../services/firestore_service.dart';
 import '../utils/app_colors.dart';
 import '../utils/category_utils.dart';
 import '../utils/formatters.dart';
@@ -18,11 +19,32 @@ class ProductDetailPage extends StatefulWidget {
 }
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
+  final FirestoreService _firestoreService = FirestoreService();
   int _cantidad = 1;
   DateTime? _seleccionarFecha;
   TimeOfDay? _selecionarHora;
+  int? _availableStock;
+  bool _isLoadingStock = false;
 
+  int get _effectiveStock => _availableStock ?? widget.product.stock;
   double get _totalPrice => widget.product.pricePerUnit * _cantidad;
+
+  Future<void> _checkAvailability() async {
+    if (_seleccionarFecha == null) return;
+    setState(() => _isLoadingStock = true);
+    final available = await _firestoreService.getAvailableStock(
+      productId: widget.product.id,
+      date: _seleccionarFecha!,
+      totalStock: widget.product.stock,
+    );
+    if (mounted) {
+      setState(() {
+        _availableStock = available;
+        _isLoadingStock = false;
+        if (_cantidad > available) _cantidad = available.clamp(1, available);
+      });
+    }
+  }
 
   void _addToCart() {
     final authProvider = context.read<AppAuthProvider>();
@@ -128,12 +150,29 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     children: [
                       Icon(Icons.inventory, size: 16, color: colorScheme.primary),
                       const SizedBox(width: 4),
-                      Text(
-                        'Stock disponible: ${product.stock}',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+                      if (_isLoadingStock)
+                        const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      else if (_seleccionarFecha != null && _availableStock != null)
+                        Text(
+                          'Disponible para esta fecha: $_availableStock de ${product.stock}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: _availableStock! > 0
+                                ? colorScheme.onSurfaceVariant
+                                : colorScheme.error,
+                            fontWeight: _availableStock! > 0 ? FontWeight.normal : FontWeight.w600,
+                          ),
+                        )
+                      else
+                        Text(
+                          'Stock total: ${product.stock}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colorScheme.onSurfaceVariant,
+                          ),
                         ),
-                      ),
                     ],
                   ),
                   const Divider(height: 32),
@@ -159,7 +198,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                               firstDate: DateTime.now(),
                               lastDate: DateTime.now().add(const Duration(days: 365)),
                             );
-                            if (date != null) setState(() => _seleccionarFecha = date);
+                            if (date != null) {
+                              setState(() => _seleccionarFecha = date);
+                              _checkAvailability();
+                            }
                           },
                         ),
                       ),
@@ -184,7 +226,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   const SizedBox(height: 20),
                   _QuantitySelector(
                     cantidad: _cantidad,
-                    maxStock: product.stock,
+                    maxStock: _effectiveStock,
                     onChanged: (qty) => setState(() => _cantidad = qty),
                   ),
                   const Divider(height: 32),

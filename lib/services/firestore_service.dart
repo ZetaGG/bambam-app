@@ -175,6 +175,39 @@ class FirestoreService {
     });
   }
 
+  // --- Availability methods ---
+
+  Future<int> getAvailableStock({
+    required String productId,
+    required DateTime date,
+    required int totalStock,
+  }) async {
+    final startOfDay = DateTime(date.year, date.month, date.day);
+    final endOfDay = startOfDay.add(const Duration(days: 1));
+
+    int reservedQty = 0;
+
+    final usersSnapshot = await _db.collection('users').get();
+    for (final userDoc in usersSnapshot.docs) {
+      final ordersSnapshot = await _db
+          .collection('users/${userDoc.id}/orders')
+          .where('fechaEvento', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where('fechaEvento', isLessThan: Timestamp.fromDate(endOfDay))
+          .get();
+
+      for (final orderDoc in ordersSnapshot.docs) {
+        final items = orderDoc.data()['items'] as List<dynamic>? ?? [];
+        for (final item in items) {
+          if (item['productId'] == productId) {
+            reservedQty += (item['quantity'] as int?) ?? 0;
+          }
+        }
+      }
+    }
+
+    return (totalStock - reservedQty).clamp(0, totalStock);
+  }
+
   // --- Seed ---
 
   Future<void> seedProducts() async {
