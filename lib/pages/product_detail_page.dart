@@ -249,13 +249,28 @@ class _ProductImage extends StatelessWidget {
       color: colorScheme.primaryContainer,
       child: Stack(
         children: [
-          Center(
-            child: Icon(
-              categoryIcon(product.category),
-              size: 80,
-              color: colorScheme.primary.withValues(alpha: 0.3),
+          if (product.imageUrl.isNotEmpty)
+            Positioned.fill(
+              child: Image.network(
+                product.imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => Center(
+                  child: Icon(
+                    categoryIcon(product.category),
+                    size: 80,
+                    color: colorScheme.primary.withValues(alpha: 0.3),
+                  ),
+                ),
+              ),
+            )
+          else
+            Center(
+              child: Icon(
+                categoryIcon(product.category),
+                size: 80,
+                color: colorScheme.primary.withValues(alpha: 0.3),
+              ),
             ),
-          ),
           Positioned(
             top: 16,
             left: 16,

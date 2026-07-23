@@ -32,13 +32,28 @@ class ProductCard extends StatelessWidget {
               ),
               child: Stack(
                 children: [
-                  Center(
-                    child: Icon(
-                      categoryIcon(product.category),
-                      size: 48,
-                      color: colorScheme.primary.withValues(alpha: 0.4),
+                  if (product.imageUrl.isNotEmpty)
+                    Positioned.fill(
+                      child: Image.network(
+                        product.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, _, _) => Center(
+                          child: Icon(
+                            categoryIcon(product.category),
+                            size: 48,
+                            color: colorScheme.primary.withValues(alpha: 0.4),
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                    Center(
+                      child: Icon(
+                        categoryIcon(product.category),
+                        size: 48,
+                        color: colorScheme.primary.withValues(alpha: 0.4),
+                      ),
                     ),
-                  ),
                   Positioned(
                     top: 8,
                     right: 8,
