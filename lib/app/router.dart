@@ -6,6 +6,7 @@ import '../pages/cart_page.dart';
 import '../pages/agenda_page.dart';
 import '../pages/profile_page.dart';
 import '../pages/product_detail_page.dart';
+import '../pages/checkout_page.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
 
@@ -69,6 +70,11 @@ final appRouter = GoRouter(
         final product = state.extra as Product;
         return ProductDetailPage(product: product);
       },
+    ),
+    GoRoute(
+      path: '/checkout',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) => const CheckoutPage(),
     ),
   ],
 );

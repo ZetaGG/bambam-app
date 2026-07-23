@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../providers/cart_provider.dart';
 
 class CartFooter extends StatelessWidget {
@@ -66,14 +67,7 @@ class CartFooter extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: FilledButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Próximamente: flujo de pedido'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
+              onPressed: () => context.push('/checkout'),
               style: FilledButton.styleFrom(
                 backgroundColor: colorScheme.tertiary,
                 foregroundColor: Colors.white,
